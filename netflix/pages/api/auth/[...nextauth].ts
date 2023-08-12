@@ -26,33 +26,34 @@ export default NextAuth({
 
               const user = await prismadb.user.findUnique({
                 where: {
-                    email: credentials.Email
+                    email: credentials.email
                 }
               });
 
               if (!user || !user.hashedPassword) {
-                throw new Error ("Email não registrado");
+                throw new Error ("Email não registrado.");
               }
 
               const isCorrectPassword = await compare(credentials.password, user.hashedPassword);
 
               if (!isCorrectPassword) {
-                throw new Error("Senha incorreta")
+                throw new Error("Senha incorreta.")
               }
 
-              return user:
+              return user;
             }
         })
-    ]
+    ],
+
     pages: {
         signIn: "/auth",
     },
     debug: process.env.NODE_ENV === "development",
-    sesion: {
+    session: {
         strategy: "jwt", 
-    }
+    },
     jwt: {
         secret: process.env.NEXTAUTH_JWT_SECRET,
     },
     secret: process.env.NEXAUTH_SECRET
-})
+});

@@ -1,7 +1,11 @@
 import Input from "@/components/input";
 import { useCallback, useState } from "react";
+import axios from "axios";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/router";
 
 const Auth = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -13,6 +17,50 @@ const Auth = () => {
       currentVariant == "login" ? "register" : "login"
     );
   }, []);
+
+  const login = useCallback(async () => {
+    try {
+      await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl: "/"
+      })
+
+      router.push("/")
+    } catch(error) {
+      console.log(error);
+    }
+  }, [email, password, router]);
+
+  const register = useCallback(async () => {
+    try {
+      await axios.post("/api/register", {
+        email,
+        name,
+        password,
+      }); 
+
+    login() 
+    } catch (error) {
+      console.log(error);
+    }
+  }, [email, name, password, login ]);
+
+  // const login = useCallback(async () => {
+  //   try {
+  //     await signIn("credentials", {
+  //       email,
+  //       password,
+  //       redirect: false,
+  //       callbackUrl: "/"
+  //     });
+
+  //     router.push("/")
+  //   } catch(error) {
+  //     console.log(error);
+  //   }
+  // }, [email, password, router]);
 
   return (
     <div className="relative h-full w-full bg-[url('/images/background.jpg')] bg-no-repeat bg-center bg-cover bg-fixed">
@@ -49,16 +97,18 @@ const Auth = () => {
                 value={password}
               />
             </div>
-            <button className="bg-red-600 py-3 text-white rounded-md w-full mt-10 hover:bg-red-700 transition">
-              {variant == "login" ? "Entrar" : "Registre-se"}
+            <button onClick={ variant === "login" ? login : register} className="bg-red-600 py-3 text-white rounded-md w-full mt-10 hover:bg-red-700 transition">
+              {variant === "login" ? "Entrar" : "Registre-se"}
             </button>
             <p className="text-neutral-500 mt-12">
-              {variant == "login" ? "Primeira vez no Netflix?" : "Já tenho conta no Netflix."}
+              {variant === "login"
+                ? "Primeira vez no Netflix?"
+                : "Já tenho conta no Netflix."}
               <span
                 onClick={toggleVariant}
                 className="text-white ml-1 hover:underline cursor-pointer"
               >
-               {variant == "login" ? "Crie uma conta." : "Entrar."}
+                {variant === "login" ? "Crie uma conta." : "Entrar."}
               </span>
             </p>
           </div>
